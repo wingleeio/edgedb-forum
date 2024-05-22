@@ -6,5 +6,6 @@ export const client = createClient({
 });
 
 export const auth = createAuth(client, {
-  baseUrl: "http://localhost:3001",
+  baseUrl: "http://localhost:3000",
+  magicLinkFailurePath: "/auth/login",
 });
