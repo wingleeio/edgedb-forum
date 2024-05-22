@@ -1,32 +1,21 @@
 "use client";
 
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import {
-  RiArrowRightLine,
-  RiDiscordFill,
-  RiGithubFill,
-  RiGoogleFill,
-} from "react-icons/ri";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { RiArrowRightLine } from "react-icons/ri";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import Link from "next/link";
-import { Loader2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-import { emailPasswordSignUp } from "@/lib/auth";
-import { toast } from "sonner";
-import { useForm } from "react-hook-form";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { z } from "zod";
+import { handleEmailPasswordSignUp } from "@/lib/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { FaGithub } from "react-icons/fa";
+import { FcGoogle } from "react-icons/fc";
+import { toast } from "sonner";
+import { z } from "zod";
 
 const schema = z
   .object({
@@ -49,7 +38,6 @@ const schema = z
   });
 
 export default function RegisterForm() {
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
@@ -62,11 +50,25 @@ export default function RegisterForm() {
   const onSubmit = async (data: z.infer<typeof schema>) => {
     setLoading(true);
     const loadingId = toast.loading("Registering...", {
-      description:
-        "Please hold on while our specialized team of space rabbits create your account",
+      description: "Please hold on while our specialized team of space rabbits create your account",
     });
-    const test = await emailPasswordSignUp(data);
-    console.log(test);
+
+    try {
+      await handleEmailPasswordSignUp(data);
+    } catch (error) {
+      let errorMessage = "Something went wrong!";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === "string") {
+        errorMessage = error;
+      }
+      toast.error("Error", {
+        description: `${errorMessage}`,
+      });
+    } finally {
+      toast.dismiss(loadingId);
+      setLoading(false);
+    }
   };
 
   return (
@@ -80,17 +82,13 @@ export default function RegisterForm() {
             <img className="h-8 mb-8" src="/logo.svg" alt="my logo" />
           </Link>
           <h1 className="font-semibold mb-2">Register for Superstack</h1>
-          <p className="text-muted-foreground text-sm mb-8">
-            Hello! Please register to continue
-          </p>
+          <p className="text-muted-foreground text-sm mb-8">Hello! Please register to continue</p>
           <div className="flex gap-2 w-full mb-4">
-            <Button variant="outline" className="h-8 flex-1 gap-4" size="sm">
-              <RiGithubFill />
-              Github
+            <Button variant="outline" className="flex-1 gap-4">
+              <FaGithub className="h-5 w-5" />
             </Button>
-            <Button variant="outline" className="h-8 flex-1 gap-4" size="sm">
-              <RiGoogleFill />
-              Google
+            <Button variant="outline" className="flex-1 gap-4">
+              <FcGoogle className="h-5 w-5" />
             </Button>
           </div>
           <div className="mb-4 w-full flex items-center">
@@ -143,18 +141,9 @@ export default function RegisterForm() {
               </FormItem>
             )}
           />
-          <Button
-            type="submit"
-            className="h-8 w-full gap-2"
-            size="sm"
-            disabled={loading}
-          >
+          <Button type="submit" className="w-full gap-2" disabled={loading}>
             <span>Continue</span>
-            {loading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <RiArrowRightLine />
-            )}
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RiArrowRightLine />}
           </Button>
         </div>
         <div className="p-4 text-center text-sm">
