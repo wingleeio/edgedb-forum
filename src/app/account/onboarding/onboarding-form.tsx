@@ -1,6 +1,5 @@
 "use client";
 
-import { FaDiscord, FaGithub } from "react-icons/fa";
 import {
     Form,
     FormControl,
@@ -15,8 +14,8 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { RiArrowRightLine } from "react-icons/ri";
-import { Separator } from "@/components/ui/separator";
 import { handleEmailPasswordSignIn } from "@/lib/auth";
+import { handleOnboarding } from "./onboarding.actions";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
@@ -24,34 +23,27 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 const schema = z.object({
-    email: z.string().email(),
-    password: z.string().min(8),
+    name: z.string().min(1),
 });
 
-export default function LoginForm({
-    githubHref,
-    discordHref,
-}: {
-    githubHref: string;
-    discordHref: string;
-}) {
+export default function OnboardingForm() {
     const [loading, setLoading] = useState(false);
     const form = useForm<z.infer<typeof schema>>({
         resolver: zodResolver(schema),
         defaultValues: {
-            email: "",
+            name: "",
         },
     });
 
     const onSubmit = async (data: z.infer<typeof schema>) => {
         setLoading(true);
-        const loadingId = toast.loading("Logging in...", {
+        const loadingId = toast.loading("Onboarding...", {
             description:
-                "Please hold on while our specialized team of space rabbits verify your credentials",
+                "Please hold on while we finish setting up your account",
         });
 
         try {
-            await handleEmailPasswordSignIn(data);
+            await handleOnboarding(data.name);
         } catch (error) {
             let errorMessage = "Something went wrong!";
             if (error instanceof Error) {
@@ -71,7 +63,7 @@ export default function LoginForm({
     return (
         <Form {...form}>
             <div className="relative bg-muted rounded-md shadow-lg border border-solid w-[380px] max-w-full">
-                <div className="rounded-md p-8 flex flex-col items-center bg-background border-b border-solid">
+                <div className="rounded-md p-8 flex flex-col bg-background">
                     <Link href="/">
                         <img
                             className="h-8 mb-8"
@@ -79,59 +71,27 @@ export default function LoginForm({
                             alt="my logo"
                         />
                     </Link>
-                    <h1 className="font-semibold mb-2">Login to Superstack</h1>
+                    <h1 className="font-semibold mb-2">Let's get started</h1>
                     <p className="text-muted-foreground text-sm mb-8">
-                        Welcome back! Please login to continue
+                        Fill in a few more details to continue
                     </p>
-                    <div className="flex gap-2 w-full mb-4">
-                        <Link href={githubHref} className="flex-1">
-                            <Button variant="outline" className="w-full gap-4">
-                                <FaGithub className="h-5 w-5" />
-                            </Button>
-                        </Link>
-                        <Link href={discordHref} className="flex-1">
-                            <Button variant="outline" className="w-full gap-4">
-                                <FaDiscord className="h-5 w-5 fill-[#7289da]" />
-                            </Button>
-                        </Link>
-                    </div>
-                    <div className="mb-4 w-full flex items-center">
-                        <Separator className="flex-1" />
-                        <span className="text-muted-foreground text-xs px-2">
-                            OR
-                        </span>
-                        <Separator className="flex-1" />
-                    </div>
                     <form
                         onSubmit={form.handleSubmit(onSubmit)}
                         className="w-full"
                     >
                         <FormField
                             control={form.control}
-                            name="email"
+                            name="name"
                             render={({ field }) => (
                                 <FormItem className="w-full mb-4 text-muted-foreground">
                                     <div className="flex justify-between items-center gap-4">
-                                        <FormLabel>Email Address</FormLabel>
+                                        <FormLabel className="whitespace-nowrap">
+                                            Display Name
+                                        </FormLabel>
                                         <FormMessage className="text-xs opacity-80 font-normal text-right" />
                                     </div>
                                     <FormControl>
-                                        <Input type="email" {...field} />
-                                    </FormControl>
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="password"
-                            render={({ field }) => (
-                                <FormItem className="w-full mb-4 text-muted-foreground">
-                                    <div className="flex justify-between items-center gap-4">
-                                        <FormLabel>Password</FormLabel>
-                                        <FormMessage className="text-xs opacity-80 font-normal text-right" />
-                                    </div>
-                                    <FormControl>
-                                        <Input type="password" {...field} />
+                                        <Input {...field} />
                                     </FormControl>
                                 </FormItem>
                             )}
@@ -149,13 +109,6 @@ export default function LoginForm({
                             )}
                         </Button>
                     </form>
-                </div>
-
-                <div className="p-4 text-center text-sm">
-                    <span className="text-muted-foreground/80">
-                        Don't have an account?{" "}
-                    </span>
-                    <Link href="/auth/register">Register</Link>
                 </div>
             </div>
         </Form>

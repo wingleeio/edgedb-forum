@@ -1,33 +1,37 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import { auth } from "./edgedb";
+import { redirect } from "next/navigation";
 
 const {
-  signout,
-  emailPasswordSignIn,
-  emailPasswordSendPasswordResetEmail,
-  emailPasswordResendVerificationEmail,
-  emailPasswordResetPassword,
-  emailPasswordSignUp,
-  magicLinkSignIn,
-  magicLinkSignUp,
+    signout,
+    emailPasswordSignIn,
+    emailPasswordSendPasswordResetEmail,
+    emailPasswordResendVerificationEmail,
+    emailPasswordResetPassword,
+    emailPasswordSignUp,
+    magicLinkSignIn,
+    magicLinkSignUp,
 } = auth.createServerActions();
 
 export const handleSignout = async () => {
-  await signout();
+    await signout();
 
-  redirect("/");
+    redirect("/");
 };
 
-export const handleEmailPasswordSignIn = async (...args: Parameters<typeof emailPasswordSignIn>) => {
-  await emailPasswordSignIn(...args);
+export const handleEmailPasswordSignIn = async (
+    ...args: Parameters<typeof emailPasswordSignIn>
+) => {
+    await emailPasswordSignIn(...args);
 
-  redirect("/");
+    redirect("/");
 };
 
-export const handleEmailPasswordSignUp = async (...args: Parameters<typeof emailPasswordSignUp>) => {
-  await emailPasswordSignUp(...args);
+export const handleEmailPasswordSignUp = async (
+    ...args: Parameters<typeof emailPasswordSignUp>
+) => {
+    await emailPasswordSignUp(...args);
 
-  redirect("/auth/verify-email");
+    redirect("/auth/verify-email");
 };
