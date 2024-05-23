@@ -1,8 +1,7 @@
 "use server";
 
-import { EdgeDBAuthError } from "@edgedb/auth-nextjs/app";
-import { auth } from "./edgedb";
 import { redirect } from "next/navigation";
+import { auth } from "./edgedb";
 
 const {
   signout,
@@ -16,41 +15,19 @@ const {
 } = auth.createServerActions();
 
 export const handleSignout = async () => {
-  try {
-    await signout();
-  } catch (e) {
-    if (e instanceof EdgeDBAuthError) {
-      throw e;
-    }
-  }
+  await signout();
 
   redirect("/");
 };
 
-export const handleEmailPasswordSignIn = async (
-  ...args: Parameters<typeof emailPasswordSignIn>
-) => {
-  try {
-    await emailPasswordSignIn(...args);
-  } catch (e) {
-    if (e instanceof EdgeDBAuthError) {
-      throw e;
-    }
-  }
+export const handleEmailPasswordSignIn = async (...args: Parameters<typeof emailPasswordSignIn>) => {
+  await emailPasswordSignIn(...args);
 
   redirect("/");
 };
 
-export const handleEmailPasswordSignUp = async (
-  ...args: Parameters<typeof emailPasswordSignUp>
-) => {
-  try {
-    await emailPasswordSignUp(...args);
-  } catch (e) {
-    if (e instanceof EdgeDBAuthError) {
-      throw e;
-    }
-  }
+export const handleEmailPasswordSignUp = async (...args: Parameters<typeof emailPasswordSignUp>) => {
+  await emailPasswordSignUp(...args);
 
   redirect("/auth/verify-email");
 };
