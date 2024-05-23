@@ -7,13 +7,14 @@ import { redirect } from "next/navigation";
 
 export default async function Home() {
     const session = auth.getSession();
-
     const signedIn = await session.isSignedIn();
+
+    let user: User | null = null;
 
     if (signedIn) {
         try {
-            await session.client.queryRequiredSingle<User>(
-                "select global current_user"
+            user = await session.client.queryRequiredSingle<User>(
+                "select global current_user { * }"
             );
         } catch (e) {
             redirect("/account/onboarding");
@@ -23,14 +24,17 @@ export default async function Home() {
     return (
         <div className="flex p-4 gap-2">
             {signedIn ? (
-                <form
-                    action={async () => {
-                        "use server";
-                        await handleSignout();
-                    }}
-                >
-                    <Button>Logout</Button>
-                </form>
+                <>
+                    <h1>Welcome to the home page {user?.name}</h1>
+                    <form
+                        action={async () => {
+                            "use server";
+                            await handleSignout();
+                        }}
+                    >
+                        <Button>Logout</Button>
+                    </form>
+                </>
             ) : (
                 <>
                     <Link href="/auth/login">
