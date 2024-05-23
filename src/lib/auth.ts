@@ -1,8 +1,8 @@
 "use server";
 
 import { EdgeDBAuthError } from "@edgedb/auth-nextjs/app";
-import { redirect } from "next/navigation";
 import { auth } from "./edgedb";
+import { redirect } from "next/navigation";
 
 const {
   signout,
@@ -27,7 +27,9 @@ export const handleSignout = async () => {
   redirect("/");
 };
 
-export const handleEmailPasswordSignIn = async (...args: Parameters<typeof emailPasswordSignIn>) => {
+export const handleEmailPasswordSignIn = async (
+  ...args: Parameters<typeof emailPasswordSignIn>
+) => {
   try {
     await emailPasswordSignIn(...args);
   } catch (e) {
@@ -39,7 +41,9 @@ export const handleEmailPasswordSignIn = async (...args: Parameters<typeof email
   redirect("/");
 };
 
-export const handleEmailPasswordSignUp = async (...args: Parameters<typeof emailPasswordSignUp>) => {
+export const handleEmailPasswordSignUp = async (
+  ...args: Parameters<typeof emailPasswordSignUp>
+) => {
   try {
     await emailPasswordSignUp(...args);
   } catch (e) {
