@@ -10,19 +10,18 @@ import {
 } from "@/components/ui/form";
 
 import { Button } from "@/components/ui/button";
-import { FaGithub } from "react-icons/fa";
-import { FcGoogle } from "react-icons/fc";
 import { Input } from "@/components/ui/input";
-import Link from "next/link";
-import { Loader2 } from "lucide-react";
-import { RiArrowRightLine } from "react-icons/ri";
 import { Separator } from "@/components/ui/separator";
 import { handleEmailPasswordSignUp } from "@/lib/auth";
-import { toast } from "sonner";
-import { useForm } from "react-hook-form";
-import { useState } from "react";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { FaDiscord, FaGithub } from "react-icons/fa";
+import { RiArrowRightLine } from "react-icons/ri";
+import { toast } from "sonner";
+import { z } from "zod";
 
 const schema = z
     .object({
@@ -44,7 +43,13 @@ const schema = z
         }
     });
 
-export default function RegisterForm() {
+export default function RegisterForm({
+    githubHref,
+    discordHref,
+}: {
+    githubHref: string;
+    discordHref: string;
+}) {
     const [loading, setLoading] = useState(false);
     const form = useForm<z.infer<typeof schema>>({
         resolver: zodResolver(schema),
@@ -97,12 +102,16 @@ export default function RegisterForm() {
                         Hello! Please register to continue
                     </p>
                     <div className="flex gap-2 w-full mb-4">
-                        <Button variant="outline" className="flex-1 gap-4">
-                            <FaGithub className="h-5 w-5" />
-                        </Button>
-                        <Button variant="outline" className="flex-1 gap-4">
-                            <FcGoogle className="h-5 w-5" />
-                        </Button>
+                        <Link href={githubHref} className="flex-1">
+                            <Button variant="outline" className="w-full gap-4">
+                                <FaGithub className="h-5 w-5" />
+                            </Button>
+                        </Link>
+                        <Link href={discordHref} className="flex-1">
+                            <Button variant="outline" className="w-full gap-4">
+                                <FaDiscord className="h-5 w-5 fill-[#7289da]" />
+                            </Button>
+                        </Link>
                     </div>
                     <div className="mb-4 w-full flex items-center">
                         <Separator className="flex-1" />

@@ -21,6 +21,13 @@ module default {
         };
     }
 
+    abstract type Interaction extending Node {
+        required author: User {
+            default := global current_user;
+        }
+        reactions := .<node[is Reaction];
+    }
+
     type User extending Node {
         required identity: ext::auth::Identity { 
             constraint exclusive;
@@ -31,5 +38,39 @@ module default {
         required role: Role {
             default := Role.User;
         };
+        interactions := .<author[is Interaction];
+    }
+
+    type Category extending Node {
+        required name: str;
+        posts := .<category[is Post];
+        comments := .<category[is Comment];
+        required slug: str {
+            constraint exclusive;
+        }
+        required allowed: Role {
+            default := Role.User;
+        };
+    }
+
+    type Post extending Interaction {
+        required title: str;
+        required content: str;
+        required category: Category;
+        comments := .<post[is Comment];
+    }
+
+    type Comment extending Interaction {
+        required content: str;
+        required post: Post;
+        required category: Category;
+    }
+
+    type Reaction extending Node {
+        required author: User {
+            default := global current_user;
+        }
+        required node: Interaction;
+        required emoji: str;
     }
 }

@@ -77,20 +77,58 @@ export namespace $default {
     "created_at": Date;
     "updated_at": Date;
   }
+  export interface Category extends Node {
+    "name": string;
+    "posts": Post[];
+    "comments": Comment[];
+    "allowed": Role;
+    "slug": string;
+  }
+  export interface Interaction extends Node {
+    "reactions": Reaction[];
+    "author": User;
+  }
+  export interface Comment extends Interaction {
+    "post": Post;
+    "content": string;
+    "category": Category;
+  }
+  export interface Post extends Interaction {
+    "category": Category;
+    "content": string;
+    "title": string;
+    "comments": Comment[];
+  }
+  export interface Reaction extends Node {
+    "node": Interaction;
+    "author": User;
+    "emoji": string;
+  }
   export type Role = "Admin" | "User";
   export interface User extends Node {
     "identity": ext.auth.Identity;
     "name": string;
     "role": Role;
+    "interactions": Interaction[];
   }
   export interface current_user extends User {}
 }
 import Node = $default.Node;
+import Category = $default.Category;
+import Interaction = $default.Interaction;
+import Comment = $default.Comment;
+import Post = $default.Post;
+import Reaction = $default.Reaction;
 import Role = $default.Role;
 import User = $default.User;
 import current_user = $default.current_user;
 export type {
   Node,
+  Category,
+  Interaction,
+  Comment,
+  Post,
+  Reaction,
   Role,
   User,
   current_user
@@ -488,6 +526,11 @@ export interface types {
   };
   "default": {
     "Node": $default.Node;
+    "Category": $default.Category;
+    "Interaction": $default.Interaction;
+    "Comment": $default.Comment;
+    "Post": $default.Post;
+    "Reaction": $default.Reaction;
     "Role": $default.Role;
     "User": $default.User;
     "current_user": $default.current_user;
