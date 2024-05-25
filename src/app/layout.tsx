@@ -1,14 +1,14 @@
 import "./globals.css";
 
+import { Inter } from "next/font/google";
+import type { Metadata } from "next";
 import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-    title: "Superstack",
+    title: "EdgeDB Forum",
     description: "Last generation forum made with next generation tools",
 };
 

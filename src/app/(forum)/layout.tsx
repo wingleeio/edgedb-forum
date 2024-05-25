@@ -1,12 +1,13 @@
+import { MessageCircle, User as UserIcon } from "lucide-react";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { User } from "@/dbschema/interfaces";
-import { handleSignout } from "@/lib/auth";
-import { auth } from "@/lib/edgedb";
-import { MessageCircle, User as UserIcon } from "lucide-react";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { User } from "@/dbschema/interfaces";
+import { auth } from "@/lib/edgedb";
 import { getCategories } from "../shared.actions";
+import { handleSignout } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 export default async function ForumLayout({
     children,
@@ -73,11 +74,13 @@ export default async function ForumLayout({
             </header>
             <div className="max-w-6xl mx-auto flex gap-6 py-8 px-4 flex-col-reverse md:flex-row">
                 <div className="w-full md:w-[250px]">
-                    <Link href="/">
-                        <Button size="sm" className="w-full mb-6">
-                            Start a Conversation
-                        </Button>
-                    </Link>
+                    {signedIn && (
+                        <Link href="/new">
+                            <Button size="sm" className="w-full mb-6">
+                                Start a Conversation
+                            </Button>
+                        </Link>
+                    )}
                     <div className="flex flex-col gap-2">
                         <Link href="/">
                             <Button
