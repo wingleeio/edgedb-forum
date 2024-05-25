@@ -57,6 +57,9 @@ module default {
         required title: str;
         required content: str;
         required category: Category;
+        required slug: str {
+            constraint exclusive;
+        };
         comments := .<post[is Comment];
     }
 

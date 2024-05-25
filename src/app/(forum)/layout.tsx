@@ -1,13 +1,13 @@
-import { MessageCircle, User as UserIcon } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import { User } from "@/dbschema/interfaces";
-import { auth } from "@/lib/edgedb";
-import { getCategories } from "../shared.actions";
 import { handleSignout } from "@/lib/auth";
+import { auth } from "@/lib/edgedb";
+import Link from "next/link";
 import { redirect } from "next/navigation";
+import { getCategories } from "../shared.actions";
 
 export default async function ForumLayout({
     children,
@@ -92,15 +92,7 @@ export default async function ForumLayout({
                                 Discussions
                             </Button>
                         </Link>
-                        <Link href="/">
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                className="flex gap-2 items-center justify-start w-full mb-6"
-                            >
-                                <UserIcon className="h-5 w-5" /> Following
-                            </Button>
-                        </Link>
+
                         {categories.map((category) => (
                             <Link
                                 key={category.id}

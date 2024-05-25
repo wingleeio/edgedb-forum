@@ -98,6 +98,7 @@ export namespace $default {
     "content": string;
     "title": string;
     "comments": Comment[];
+    "slug": string;
   }
   export interface Reaction extends Node {
     "node": Interaction;

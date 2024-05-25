@@ -11,16 +11,20 @@ import {
 } from "@/components/ui/pagination";
 import { formatRelativeDate } from "@/lib/utils";
 import Link from "next/link";
-import { getPosts } from "./forum.actions";
+import { getPostsForCat } from "../../forum.actions";
 
-export default async function Home({
+export default async function CategoryPage({
+    params,
     searchParams: { page = "1", limit = "20" },
 }: {
+    params: {
+        category: string;
+    };
     searchParams: { page?: string; limit?: string };
 }) {
     const pageAsNumber = parseInt(page);
     const limitAsNumber = parseInt(limit);
-    const { posts, total } = await getPosts({
+    const { posts, total } = await getPostsForCat(params.category, {
         page: pageAsNumber - 1,
         limit: limitAsNumber,
     });
@@ -103,56 +107,61 @@ export default async function Home({
 
     return (
         <div className="flex flex-col">
-            {posts.map((post) => (
-                <Link
-                    key={post.id}
-                    href={`/p/${post.slug}`}
-                    className="flex gap-4 p-4 hover:bg-muted/50 cursor-pointer"
-                >
-                    <div>
-                        <Avatar>
-                            <AvatarFallback></AvatarFallback>
-                        </Avatar>
-                    </div>
-                    <div>
-                        <h2 className="font-semibold">{post.title}</h2>
-                        <p className="text-xs text-muted-foreground">
-                            Posted by{" "}
-                            <span className="font-semibold">
-                                {post.author.name}
-                            </span>{" "}
-                            {formatRelativeDate(post.created_at)}
-                        </p>
-                    </div>
-                    <div className="flex-grow" />
-                    <div>
-                        <Badge>{post.category.name}</Badge>
-                    </div>
-                </Link>
-            ))}
-            <Pagination>
-                <PaginationContent>
-                    {pageAsNumber !== 1 ? (
-                        <PaginationItem>
-                            <PaginationPrevious
-                                href={`?page=${
-                                    pageAsNumber - 1
-                                }&limit=${limitAsNumber}`}
-                            />
-                        </PaginationItem>
-                    ) : null}
-                    {totalPages > 1 && renderPaginationItems()}
-                    {pageAsNumber !== totalPages ? (
-                        <PaginationItem>
-                            <PaginationNext
-                                href={`?page=${
-                                    pageAsNumber + 1
-                                }&limit=${limitAsNumber}`}
-                            />
-                        </PaginationItem>
-                    ) : null}
-                </PaginationContent>
-            </Pagination>
+            <div className="flex flex-col items-center">
+                <h1 className=" text-2xl font-semibold">{params.category}</h1>
+            </div>
+            <div className="flex flex-col">
+                {posts.map((post) => (
+                    <Link
+                        key={post.id}
+                        href={`/p/${post.slug}`}
+                        className="flex gap-4 p-4 hover:bg-muted/50 cursor-pointer"
+                    >
+                        <div>
+                            <Avatar>
+                                <AvatarFallback></AvatarFallback>
+                            </Avatar>
+                        </div>
+                        <div>
+                            <h2 className="font-semibold">{post.title}</h2>
+                            <p className="text-xs text-muted-foreground">
+                                Posted by{" "}
+                                <span className="font-semibold">
+                                    {post.author.name}
+                                </span>{" "}
+                                {formatRelativeDate(post.created_at)}
+                            </p>
+                        </div>
+                        <div className="flex-grow" />
+                        <div>
+                            <Badge>{post.category.name}</Badge>
+                        </div>
+                    </Link>
+                ))}
+                <Pagination>
+                    <PaginationContent>
+                        {pageAsNumber !== 1 ? (
+                            <PaginationItem>
+                                <PaginationPrevious
+                                    href={`?page=${
+                                        pageAsNumber - 1
+                                    }&limit=${limitAsNumber}`}
+                                />
+                            </PaginationItem>
+                        ) : null}
+                        {totalPages > 1 && renderPaginationItems()}
+                        {pageAsNumber !== totalPages ? (
+                            <PaginationItem>
+                                <PaginationNext
+                                    href={`?page=${
+                                        pageAsNumber + 1
+                                    }&limit=${limitAsNumber}`}
+                                />
+                            </PaginationItem>
+                        ) : null}
+                    </PaginationContent>
+                </Pagination>
+            </div>
         </div>
     );
 }

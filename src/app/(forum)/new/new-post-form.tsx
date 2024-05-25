@@ -9,13 +9,19 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 
-import ContentEditable from "@/components/ui/content-editable";
 import { getCategories } from "@/app/shared.actions";
-import { toast } from "sonner";
-import { useForm } from "react-hook-form";
-import { useState } from "react";
-import { z } from "zod";
+import { ForwardRefEditor } from "@/components/editor/ForwardRefEditor";
+import { Button } from "@/components/ui/button";
+import ContentEditable from "@/components/ui/content-editable";
+import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
+import "@mdxeditor/editor/style.css";
+import { Loader2 } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
+import { createPost } from "./new.actions";
 
 const schema = z.object({
     category: z.string().min(1),
@@ -34,7 +40,7 @@ export const NewPostForm = ({
         resolver: zodResolver(schema),
         defaultValues: {
             title: "",
-            category: "",
+            category: categories[0].id,
             content: "",
         },
     });
@@ -44,7 +50,8 @@ export const NewPostForm = ({
         const loadingId = toast.loading("Creating post...");
 
         try {
-            // TODO: Create post
+            await createPost(data);
+            toast.success("Post created");
         } catch (error) {
             let errorMessage = "Something went wrong!";
             if (error instanceof Error) {
@@ -62,9 +69,13 @@ export const NewPostForm = ({
     };
     return (
         <Form {...form}>
-            <div>
-                <form onSubmit={form.handleSubmit(onSubmit)}>
-                    <div className="flex">
+            <div className="p-4 border-solid border rounded-md">
+                <ForwardRefEditor markdown="hello world" />
+                <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="flex flex-col gap-4"
+                >
+                    <div className="flex gap-4">
                         <FormField
                             control={form.control}
                             name="category"
@@ -73,7 +84,7 @@ export const NewPostForm = ({
                                     onValueChange={field.onChange}
                                     value={field.value}
                                 >
-                                    <SelectTrigger>
+                                    <SelectTrigger className="w-[250px]">
                                         <SelectValue placeholder="Select Category" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -89,17 +100,41 @@ export const NewPostForm = ({
                                 </Select>
                             )}
                         />
+                        <FormField
+                            control={form.control}
+                            name="title"
+                            render={({ field }) => (
+                                <Input
+                                    placeholder="Conversation Title"
+                                    className="outline-none focus:outline-none border-none focus-visible:ring-0"
+                                    {...field}
+                                />
+                            )}
+                        />
                     </div>
                     <FormField
                         control={form.control}
                         name="content"
                         render={({ field }) => (
                             <ContentEditable
+                                placeholder="Write a post"
                                 value={field.value}
                                 onChange={field.onChange}
                             />
                         )}
                     />
+                    <div className="flex justify-end">
+                        <Button
+                            type="submit"
+                            className="w-full gap-2"
+                            disabled={loading}
+                        >
+                            <span>Submit Post</span>
+                            {loading ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : null}
+                        </Button>
+                    </div>
                 </form>
             </div>
         </Form>

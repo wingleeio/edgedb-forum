@@ -1,7 +1,8 @@
-import { NewPostForm } from "./new-post-form";
-import { auth } from "@/lib/edgedb";
 import { getCategories } from "@/app/shared.actions";
+import { User } from "@/dbschema/interfaces";
+import { auth } from "@/lib/edgedb";
 import { redirect } from "next/navigation";
+import { NewPostForm } from "./new-post-form";
 
 export default async function New() {
     const session = auth.getSession();
@@ -11,7 +12,18 @@ export default async function New() {
         return redirect("/");
     }
 
+    const user = await session.client.queryRequiredSingle<User>(
+        "select global current_user { * }"
+    );
+
     const categories = await getCategories();
 
-    return <NewPostForm categories={categories} />;
+    const allowedCategories = categories.filter((category) => {
+        if (category.allowed === "Admin") {
+            return user.role === "Admin";
+        }
+        return true;
+    });
+
+    return <NewPostForm categories={allowedCategories} />;
 }

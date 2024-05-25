@@ -1,31 +1,44 @@
-import { useEffect, useRef } from "react";
+import ReactContentEditable from "react-contenteditable";
 
 interface ContentEditableProps {
     value: string;
     onChange: (value: string) => void;
+    placeholder?: string;
 }
 
 export default function ContentEditable(props: ContentEditableProps) {
-    const contentEditableRef = useRef<HTMLDivElement>(null);
+    const convertToHtml = (text: string) => {
+        return text.replace(/\n/g, "<br>");
+    };
 
-    useEffect(() => {
-        if (!contentEditableRef.current) return;
-        if (contentEditableRef.current.textContent !== props.value) {
-            contentEditableRef.current.textContent = props.value;
-        }
-    }, [props.value]);
+    const convertToText = (html: string) => {
+        return html.replace(/<br\s*\/?>/g, "\n").replace(/<\/?[^>]+(>|$)/g, "");
+    };
 
     return (
-        <div
-            className="outline-none focus:outline-none"
-            contentEditable="true"
-            ref={contentEditableRef}
-            onInput={(event) => {
-                const target = event.target as HTMLDivElement;
-                if (target.textContent !== null) {
-                    props.onChange(target.textContent);
+        <ReactContentEditable
+            html={convertToHtml(props.value)}
+            onChange={(event) => {
+                const text = convertToText(event.target.value);
+                props.onChange(text);
+            }}
+            onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                    document.execCommand("insertHTML", false, "<br><br>");
+                    event.preventDefault();
                 }
             }}
+            onPaste={(event) => {
+                event.preventDefault();
+                const text = event.clipboardData.getData("text/plain");
+                document.execCommand("insertHTML", false, text);
+            }}
+            data-placeholder={props.value ? "" : props.placeholder}
+            className={`outline-none focus:outline-none whitespace-pre-wrap min-h-[250px] text-sm p-4 ${
+                props.value
+                    ? ""
+                    : "before:content-[attr(data-placeholder)] before:text-muted-foreground"
+            }`}
         />
     );
 }

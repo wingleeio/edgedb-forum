@@ -1,3 +1,4 @@
+// import { EmojiPicker } from "@/components/emoji-picker";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -9,21 +10,32 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from "@/components/ui/pagination";
+import { Separator } from "@/components/ui/separator";
+import { auth } from "@/lib/edgedb";
 import { formatRelativeDate } from "@/lib/utils";
-import Link from "next/link";
-import { getPosts } from "./forum.actions";
+import { Fragment } from "react";
+import { getPost } from "../../forum.actions";
+import { NewCommentForm } from "./new-comment-form";
 
-export default async function Home({
-    searchParams: { page = "1", limit = "20" },
+export default async function Post({
+    params,
+    searchParams: { page = "1", limit = "10" },
 }: {
+    params: {
+        slug: string;
+    };
     searchParams: { page?: string; limit?: string };
 }) {
+    const session = auth.getSession();
+    const signedIn = await session.isSignedIn();
+
+    const { post, comments, total } = await getPost(params.slug, {
+        page: parseInt(page) - 1,
+        limit: parseInt(limit),
+    });
     const pageAsNumber = parseInt(page);
     const limitAsNumber = parseInt(limit);
-    const { posts, total } = await getPosts({
-        page: pageAsNumber - 1,
-        limit: limitAsNumber,
-    });
+
     const totalPages = Math.ceil(total / limitAsNumber);
 
     const renderPaginationItems = () => {
@@ -103,34 +115,65 @@ export default async function Home({
 
     return (
         <div className="flex flex-col">
-            {posts.map((post) => (
-                <Link
-                    key={post.id}
-                    href={`/p/${post.slug}`}
-                    className="flex gap-4 p-4 hover:bg-muted/50 cursor-pointer"
-                >
-                    <div>
-                        <Avatar>
-                            <AvatarFallback></AvatarFallback>
-                        </Avatar>
+            <div className="flex gap-4 p-4">
+                <div className="font-semibold text-xl">{post.title}</div>
+                <div className="flex-grow" />
+                <div>
+                    <Badge>{post.category.name}</Badge>
+                </div>
+            </div>
+            {pageAsNumber - 1 < 1 ? ( // yarn add @mdxeditor/editor
+                <>
+                    <Separator className="w-full" />
+                    <div className="flex gap-4 p-4">
+                        <div>
+                            <Avatar>
+                                <AvatarFallback></AvatarFallback>
+                            </Avatar>
+                        </div>
+                        <div className="flex flex-col gap-4 w-full">
+                            <div className="flex">
+                                <div className="font-semibold">
+                                    {post.author.name}
+                                </div>
+                                <div className="flex-grow" />
+                            </div>
+                            <div>{post.content}</div>
+                            <div className="text-xs text-muted-foreground">
+                                {formatRelativeDate(post.created_at)}
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <h2 className="font-semibold">{post.title}</h2>
-                        <p className="text-xs text-muted-foreground">
-                            Posted by{" "}
-                            <span className="font-semibold">
-                                {post.author.name}
-                            </span>{" "}
-                            {formatRelativeDate(post.created_at)}
-                        </p>
+                </>
+            ) : null}
+            {comments.length === 0 && (
+                <div className="p-4">No comments yet.</div>
+            )}
+            {comments.map((comment) => (
+                <Fragment key={comment.id}>
+                    <Separator className="w-full" />
+                    <div className="flex gap-4 p-4">
+                        <div>
+                            <Avatar>
+                                <AvatarFallback></AvatarFallback>
+                            </Avatar>
+                        </div>
+                        <div className="flex flex-col gap-4 w-full">
+                            <div className="flex">
+                                <div className="font-semibold">
+                                    {comment.author.name}
+                                </div>
+                                <div className="flex-grow" />
+                            </div>
+                            <div>{comment.content}</div>
+                            <div className="text-xs text-muted-foreground">
+                                {formatRelativeDate(comment.created_at)}
+                            </div>
+                        </div>
                     </div>
-                    <div className="flex-grow" />
-                    <div>
-                        <Badge>{post.category.name}</Badge>
-                    </div>
-                </Link>
+                </Fragment>
             ))}
-            <Pagination>
+            <Pagination className="p-4">
                 <PaginationContent>
                     {pageAsNumber !== 1 ? (
                         <PaginationItem>
@@ -142,7 +185,7 @@ export default async function Home({
                         </PaginationItem>
                     ) : null}
                     {totalPages > 1 && renderPaginationItems()}
-                    {pageAsNumber !== totalPages ? (
+                    {pageAsNumber !== totalPages && totalPages !== 0 ? (
                         <PaginationItem>
                             <PaginationNext
                                 href={`?page=${
@@ -153,6 +196,9 @@ export default async function Home({
                     ) : null}
                 </PaginationContent>
             </Pagination>
+            {signedIn && (
+                <NewCommentForm category={post.category.id} post={post.id} />
+            )}
         </div>
     );
 }
